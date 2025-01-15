@@ -4,6 +4,7 @@
  */
 
 const adminService = require('../services/admin.service');
+const eventService = require('../services/event.service');
 
 /**
  * GET /admin/users
@@ -54,8 +55,8 @@ exports.deleteUser = async (req, res, next) => {
  */
 exports.getAllEventsWithStats = async (req, res, next) => {
   try {
-    const events = await adminService.getAllEventsWithStats();
-    return res.status(200).json(events);
+    const eventsWithStats = await eventService.getAllEventsWithStats();
+    return res.status(200).json({ data: eventsWithStats });
   } catch (error) {
     next(error);
   }

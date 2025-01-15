@@ -28,4 +28,12 @@ router.put('/:id', authenticate, authorizeRoles(ROLES.ORGANIZER), eventControlle
 // DELETE /events/:id (organizer-only)
 router.delete('/:id', authenticate, authorizeRoles(ROLES.ORGANIZER), eventController.deleteEvent);
 
+// GET /events/stats (organizer/admin only)
+router.get(
+    '/stats',
+    authenticate,
+    authorizeRoles(ROLES.ORGANIZER, ROLES.ADMIN),
+    eventController.getEventsWithStats
+  );
+
 module.exports = router;

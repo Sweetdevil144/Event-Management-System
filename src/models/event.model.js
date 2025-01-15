@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 /**
@@ -8,32 +8,32 @@ const eventSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, 'Event name is required'],
+      required: [true, "Event name is required"],
       trim: true,
     },
     description: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     date: {
       type: Date,
-      required: [true, 'Event date is required'],
+      required: [true, "Event date is required"],
     },
     location: {
       type: String,
-      required: [true, 'Location is required'],
+      required: [true, "Location is required"],
       trim: true,
     },
     capacity: {
       type: Number,
-      required: [true, 'Capacity is required'],
+      required: [true, "Capacity is required"],
     },
     // The organizer will be a reference to a User with role 'organizer'
     organizer: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Organizer is required'],
+      ref: "User",
+      required: [true, "Organizer is required"],
     },
   },
   {
@@ -41,4 +41,4 @@ const eventSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model('Event', eventSchema);
+module.exports = mongoose.model("Event", eventSchema);

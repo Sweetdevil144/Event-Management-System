@@ -72,3 +72,12 @@ exports.deleteEvent = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getEventsWithStats = async (req, res, next) => {
+  try {
+    const eventsWithStats = await eventService.getAllEventsWithStats();
+    return res.status(200).json(eventsWithStats);
+  } catch (error) {
+    next(error);
+  }
+};
