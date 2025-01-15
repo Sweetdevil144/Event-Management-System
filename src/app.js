@@ -20,7 +20,10 @@ app.use(express.json());
 
 // Home route
 app.get('/', (req, res) => {
-  res.send('Welcome to Event Management API. Please refer to \'/api-docs\' for Swagger Documentations');
+  res.json({
+    message: 'Welcome to Event Management API.',
+    info: "Please refer to '/api-docs' for Swagger Documentations"
+  });
 });
 
 // Mount all routes under /api
