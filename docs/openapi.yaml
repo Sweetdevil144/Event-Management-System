@@ -1,0 +1,298 @@
+openapi: 3.1.0
+info:
+  title: Event Management API
+  description: A backend API for managing events, users, and analytics
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Events
+  - name: Admin
+  - name: Analytics
+  - name: Notifications
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user and get JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+        - Users
+      summary: Update user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+
+  /events:
+    get:
+      tags:
+        - Events
+      summary: List all events
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Events
+      summary: Create a new event (organizer only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                location:
+                  type: string
+                capacity:
+                  type: integer
+      responses:
+        '201':
+          description: Event created
+
+  /events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Get event details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+        - Events
+      summary: Update event
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                location:
+                  type: string
+                capacity:
+                  type: integer
+      responses:
+        '200':
+          description: Event updated
+    delete:
+      tags:
+        - Events
+      summary: Delete event
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event deleted
+
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: List all users (admin only)
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /admin/users/{id}:
+    delete:
+      tags:
+        - Admin
+      summary: Delete user by ID (admin only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted
+
+  /admin/events:
+    get:
+      tags:
+        - Admin
+      summary: Get all events with stats (admin only)
+      responses:
+        '200':
+          description: OK
+
+  /analytics/events/popular:
+    get:
+      tags:
+        - Analytics
+      summary: Get top events by registrations
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /analytics/users/active:
+    get:
+      tags:
+        - Analytics
+      summary: Get top users by registrations
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /analytics/events/{id}/stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get stats for a specific event
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+  /notifications/send:
+    post:
+      tags:
+        - Notifications
+      summary: Notify all attendees of an event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_id:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Notification sent
