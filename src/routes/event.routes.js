@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * Event endpoints:
  * - POST /events
  * - GET /events
@@ -8,32 +8,50 @@
  * - DELETE /events/:id
  */
 
-const router = require('express').Router();
-const eventController = require('../controllers/event.controller');
-const { authenticate, authorizeRoles } = require('../middlewares/auth.middleware');
-const { ROLES } = require('../utils/constants');
+const router = require("express").Router();
+const eventController = require("../controllers/event.controller");
+const {
+  authenticate,
+  authorizeRoles,
+} = require("../middlewares/auth.middleware");
+const { ROLES } = require("../utils/constants");
 
 // POST /events (organizer-only)
-router.post('/', authenticate, authorizeRoles(ROLES.ORGANIZER), eventController.createEvent);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles(ROLES.ORGANIZER),
+  eventController.createEvent
+);
 
 // GET /events (public: list all events)
-router.get('/', eventController.getEvents);
+router.get("/", eventController.getEvents);
 
 // GET /events/:id (public: single event details)
-router.get('/:id', eventController.getEventById);
+router.get("/:id", eventController.getEventById);
 
 // PUT /events/:id (organizer-only)
-router.put('/:id', authenticate, authorizeRoles(ROLES.ORGANIZER), eventController.updateEvent);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles(ROLES.ORGANIZER),
+  eventController.updateEvent
+);
 
 // DELETE /events/:id (organizer-only)
-router.delete('/:id', authenticate, authorizeRoles(ROLES.ORGANIZER), eventController.deleteEvent);
+router.delete(
+  "/:id",
+  authenticate,
+  authorizeRoles(ROLES.ORGANIZER),
+  eventController.deleteEvent
+);
 
 // GET /events/stats (organizer/admin only)
 router.get(
-    '/stats',
-    authenticate,
-    authorizeRoles(ROLES.ORGANIZER, ROLES.ADMIN),
-    eventController.getEventsWithStats
-  );
+  "/stats",
+  authenticate,
+  authorizeRoles(ROLES.ORGANIZER, ROLES.ADMIN),
+  eventController.getEventsWithStats
+);
 
 module.exports = router;
