@@ -6,6 +6,7 @@ info:
 
 servers:
   - url: http://localhost:3000/api
+  - url: https://event-management-system-ea5f.onrender.com/api
 
 tags:
   - name: Auth
