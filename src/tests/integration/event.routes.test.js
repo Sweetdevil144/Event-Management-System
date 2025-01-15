@@ -61,6 +61,7 @@ describe('Event Routes Integration', () => {
           date: '2026-12-31T23:00:00.000Z',
           location: 'NYC',
           capacity: 500,
+          organizer: organizerId
         });
 
       expect(res.statusCode).toBe(201);
@@ -171,7 +172,7 @@ describe('Event Routes Integration', () => {
   describe('GET /api/events/stats', () => {
     beforeEach(async () => {
       // Re-create test event since previous tests may have deleted it
-      await Event.create({
+      const event = await Event.create({
         name: 'Stats Event',
         description: 'Stats Desc',
         date: new Date('2026-01-01'),
@@ -179,6 +180,7 @@ describe('Event Routes Integration', () => {
         capacity: 200,
         organizer: organizerId,
       });
+      eventId = event._id;
     });
 
     it('should retrieve events with stats (organizer/admin)', async () => {

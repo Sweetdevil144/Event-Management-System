@@ -8,7 +8,7 @@ jest.mock('../../models', () => ({
   Event: {
     create: jest.fn(),
     find: jest.fn(),
-    findById: jest.fn(),
+    findById: jest.fn(), 
     findByIdAndUpdate: jest.fn(),
     findByIdAndRemove: jest.fn(),
     aggregate: jest.fn(),
@@ -24,20 +24,44 @@ describe('Event Service', () => {
 
   describe('createEvent', () => {
     it('should create a new event', async () => {
-      Event.create.mockResolvedValue({ name: 'New Event', capacity: 100 });
+      const mockEvent = {
+        name: 'New Event',
+        description: 'Test Description',
+        date: new Date('2025-01-01'),
+        location: 'Test Location',
+        capacity: 100,
+        organizer: 'organizerId'
+      };
 
-      const eventData = { name: 'New Event', capacity: 100 };
-      const result = await eventService.createEvent(eventData);
+      Event.create.mockResolvedValue(mockEvent);
+      const result = await eventService.createEvent(mockEvent);
 
-      expect(Event.create).toHaveBeenCalledWith(eventData);
-      expect(result).toEqual({ name: 'New Event', capacity: 100 });
+      expect(Event.create).toHaveBeenCalledWith(mockEvent);
+      expect(result).toEqual(mockEvent);
     });
   });
 
   describe('getEvents', () => {
     it('should return a list of events', async () => {
-      const mockEvents = [{ name: 'Event 1' }, { name: 'Event 2' }];
-      // Mock the chain .find().populate() -> resolved value
+      const mockEvents = [
+        {
+          name: 'Event 1',
+          description: 'Description 1',
+          date: new Date('2025-01-01'),
+          location: 'Location 1',
+          capacity: 100,
+          organizer: 'organizerId1'
+        },
+        {
+          name: 'Event 2',
+          description: 'Description 2', 
+          date: new Date('2025-02-01'),
+          location: 'Location 2',
+          capacity: 200,
+          organizer: 'organizerId2'
+        }
+      ];
+
       Event.find.mockReturnValue({
         populate: jest.fn().mockResolvedValue(mockEvents),
       });
@@ -50,7 +74,16 @@ describe('Event Service', () => {
 
   describe('getEventById', () => {
     it('should return an event by ID', async () => {
-      const mockEvent = { _id: '123', name: 'Sample Event' };
+      const mockEvent = {
+        _id: '123',
+        name: 'Sample Event',
+        description: 'Sample Description',
+        date: new Date('2025-01-01'),
+        location: 'Sample Location',
+        capacity: 100,
+        organizer: 'organizerId'
+      };
+
       Event.findById.mockReturnValue({
         populate: jest.fn().mockResolvedValue(mockEvent),
       });
@@ -59,28 +92,56 @@ describe('Event Service', () => {
       expect(Event.findById).toHaveBeenCalledWith('123');
       expect(result).toEqual(mockEvent);
     });
+
+    it('should return null if event not found', async () => {
+      Event.findById.mockReturnValue({
+        populate: jest.fn().mockResolvedValue(null),
+      });
+
+      const result = await eventService.getEventById('notfound');
+      expect(result).toBeNull();
+    });
   });
 
   describe('updateEvent', () => {
     it('should update an event by ID', async () => {
-      const updatedEvent = { _id: '123', name: 'Updated Event' };
+      const updatedEvent = {
+        _id: '123',
+        name: 'Updated Event',
+        description: 'Updated Description',
+        location: 'Updated Location'
+      };
+
       Event.findByIdAndUpdate.mockResolvedValue(updatedEvent);
 
-      const result = await eventService.updateEvent('123', {
-        name: 'Updated Event',
-      });
+      const result = await eventService.updateEvent('123', updatedEvent);
       expect(Event.findByIdAndUpdate).toHaveBeenCalledWith(
         '123',
-        { name: 'Updated Event' },
+        updatedEvent,
         { new: true, runValidators: true }
       );
       expect(result).toEqual(updatedEvent);
+    });
+
+    it('should return null if event not found', async () => {
+      Event.findByIdAndUpdate.mockResolvedValue(null);
+      const result = await eventService.updateEvent('notfound', {});
+      expect(result).toBeNull();
     });
   });
 
   describe('deleteEvent', () => {
     it('should delete an event by ID', async () => {
-      const mockEvent = { _id: '123', name: 'Event to Delete' };
+      const mockEvent = {
+        _id: '123',
+        name: 'Event to Delete',
+        description: 'To be deleted',
+        date: new Date('2025-01-01'),
+        location: 'Delete Location',
+        capacity: 100,
+        organizer: 'organizerId'
+      };
+
       Event.findByIdAndRemove.mockResolvedValue(mockEvent);
 
       const result = await eventService.deleteEvent('123');
@@ -103,9 +164,15 @@ describe('Event Service', () => {
         {
           _id: 'event1',
           name: 'Event 1',
-          registrationCount: 5,
-        },
+          description: 'Description 1',
+          date: new Date('2025-01-01'),
+          location: 'Location 1',
+          capacity: 100,
+          organizer: 'organizerId',
+          registrationCount: 5
+        }
       ];
+
       Event.aggregate.mockResolvedValue(mockAggregation);
 
       const result = await eventService.getAllEventsWithStats();
