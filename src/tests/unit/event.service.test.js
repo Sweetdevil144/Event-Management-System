@@ -1,11 +1,21 @@
 /**
- * 
  * Unit tests for event.service.js
  */
+const eventService = require('../../services/event.service');
+const { Event } = require('../../models');
 
-const eventService = require('../../../services/event.service');
-const { Event } = require('../../../models');
-jest.mock('../../../models');
+jest.mock('../../models', () => ({
+  Event: {
+    create: jest.fn(),
+    find: jest.fn(),
+    findById: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    findByIdAndRemove: jest.fn(),
+    aggregate: jest.fn(),
+  },
+  Registration: {},
+  User: {},
+}));
 
 describe('Event Service', () => {
   afterEach(() => {
@@ -27,10 +37,9 @@ describe('Event Service', () => {
   describe('getEvents', () => {
     it('should return a list of events', async () => {
       const mockEvents = [{ name: 'Event 1' }, { name: 'Event 2' }];
-      // We can't directly mock .populate() easily,
-      // so we can mock the chain using a single resolved value.
+      // Mock the chain .find().populate() -> resolved value
       Event.find.mockReturnValue({
-        populate: jest.fn().mockReturnValue(Promise.resolve(mockEvents)),
+        populate: jest.fn().mockResolvedValue(mockEvents),
       });
 
       const result = await eventService.getEvents();
@@ -57,7 +66,9 @@ describe('Event Service', () => {
       const updatedEvent = { _id: '123', name: 'Updated Event' };
       Event.findByIdAndUpdate.mockResolvedValue(updatedEvent);
 
-      const result = await eventService.updateEvent('123', { name: 'Updated Event' });
+      const result = await eventService.updateEvent('123', {
+        name: 'Updated Event',
+      });
       expect(Event.findByIdAndUpdate).toHaveBeenCalledWith(
         '123',
         { name: 'Updated Event' },
@@ -80,7 +91,9 @@ describe('Event Service', () => {
     it('should throw an error if event not found', async () => {
       Event.findByIdAndRemove.mockResolvedValue(null);
 
-      await expect(eventService.deleteEvent('notfound')).rejects.toThrow('Event not found');
+      await expect(eventService.deleteEvent('notfound')).rejects.toThrow(
+        'Event not found'
+      );
     });
   });
 

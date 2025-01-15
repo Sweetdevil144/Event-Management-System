@@ -1,25 +1,26 @@
 /**
- *
- * Global test setup for Jest. 
+ * Global test setup for Jest.
  * 1. Connect to a test database.
- * 2. Optionally insert seed data.
- * 3. Teardown after tests.
+ * 2. Load environment variables (JWT_SECRET, MONGODB_URI).
+ * 3. Increase the default Jest timeout to 30 seconds.
  */
 
 const mongoose = require('mongoose');
-require('dotenv').config({ path: '.env.test' }); // load a separate test .env if you wish
+require('dotenv').config({ path: '.env' });
+
+// Increase Jest test timeout (default is 5s)
+jest.setTimeout(30000);
 
 beforeAll(async () => {
-  // Connect to a separate test DB or use a local memory server with something like 'mongodb-memory-server'.
-  const testUri = process.env.TEST_MONGODB_URI || 'mongodb://localhost:27017/event-management-test';
-  await mongoose.connect(testUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const testUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/event-management-test';
+  if (!testUri) {
+    throw new Error('MONGODB_URI is not defined in .env');
+  }
+  await mongoose.connect(testUri, {});
 });
 
 afterAll(async () => {
-  // Close DB connection
-  await mongoose.connection.dropDatabase(); 
+  // Clean up all data (optional)
+  // await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
 });

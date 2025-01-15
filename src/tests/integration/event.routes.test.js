@@ -1,43 +1,37 @@
 /**
- *
  * Integration tests for event routes using SuperTest.
  */
 
 const request = require('supertest');
-const app = require('../../../app'); // Express app
-const { Event, User } = require('../../../models');
+const app = require('../../app');
+const { Event, User } = require('../../models');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+require('../setup');
 
 describe('Event Routes Integration', () => {
-  let server;
   let organizerToken;
   let organizerId;
   let eventId;
 
+  // Create test data once before tests
   beforeAll(async () => {
-    // Start server on a random port
-    server = app.listen(5001);
-
-    const testUri = process.env.MONGODB_URI;
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect(testUri, { useNewUrlParser: true, useUnifiedTopology: true });
-    }
-
-    // Create an organizer user
+    // 1) Create an organizer user
     const organizer = await User.create({
       name: 'Organizer One',
-      email: 'organizer1@example.com',
-      password: 'hashedpassword', // In real tests, you might hash it or just mock
+      email: `organizer.${Date.now()}@example.com`,
+      password: 'hashedpassword',
       role: 'organizer',
     });
     organizerId = organizer._id.toString();
 
-    // Simulate a login process or just sign a JWT manually for the organizer
-    // For simplicity, let's just sign a token with the same payload
-    const jwt = require('jsonwebtoken');
-    organizerToken = jwt.sign({ userId: organizerId, role: 'organizer' }, process.env.JWT_SECRET || 'simplejwt');
+    // 2) Manually sign a JWT for the organizer
+    organizerToken = jwt.sign(
+      { userId: organizerId, role: 'organizer' },
+      process.env.JWT_SECRET || 'simplejwt'
+    );
 
-    // Create an event in DB
+    // 3) Create an event
     const createdEvent = await Event.create({
       name: 'Test Event',
       description: 'Test Description',
@@ -50,10 +44,9 @@ describe('Event Routes Integration', () => {
   });
 
   afterAll(async () => {
+    // Cleanup test data
     await Event.deleteMany({});
     await User.deleteMany({});
-    await mongoose.connection.close();
-    await server.close();
   });
 
   describe('POST /api/events', () => {
@@ -80,6 +73,7 @@ describe('Event Routes Integration', () => {
       const res = await request(app).get('/api/events');
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
+      // At least 1 event (the "Test Event")
       expect(res.body.length).toBeGreaterThanOrEqual(1);
     });
   });
@@ -143,12 +137,11 @@ describe('Event Routes Integration', () => {
         .set('Authorization', `Bearer ${organizerToken}`);
 
       expect(res.statusCode).toBe(200);
-      // We expect an array of events with registrationCount
       expect(Array.isArray(res.body)).toBe(true);
-      // The "Stats Event" should appear in the array
+
       const foundEvent = res.body.find((ev) => ev._id === event2._id.toString());
       expect(foundEvent).toBeTruthy();
-      expect(foundEvent).toHaveProperty('registrationCount', 0); // no registrations yet
+      expect(foundEvent).toHaveProperty('registrationCount', 0);
     });
   });
 });

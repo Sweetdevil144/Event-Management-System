@@ -1,10 +1,9 @@
 /**
- *
  * Example unit test for analytics service.
  */
 const analyticsService = require('../../services/analytics.service');
 const { Registration } = require('../../models');
-require('../setup'); // DB connection, if needed
+require('../setup');
 
 jest.mock('../../models', () => ({
   Registration: {

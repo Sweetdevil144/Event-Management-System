@@ -1,51 +1,48 @@
 /**
- *
  * Integration tests for Auth routes using SuperTest.
  */
+
 const request = require('supertest');
-const app = require('../../app'); // Express app
+const app = require('../../app');
 const { User } = require('../../models');
-require('../setup'); // Ensure global setup runs
+require('../setup');
 
 describe('Auth Integration Tests', () => {
-  let server;
-
-  beforeAll(() => {
-    server = app.listen(4001); // or use supertest directly on app
-  });
-
-  afterAll(async () => {
-    await server.close();
-  });
 
   test('POST /api/auth/register - should register a new user', async () => {
+    const randomEmail = `test.user.${Date.now()}@example.com`;
+
     const response = await request(app)
       .post('/api/auth/register')
       .send({
         name: 'Test User',
-        email: 'test.user@example.com',
+        email: randomEmail,
         password: 'abcdef',
       });
 
+    // Expect success
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty('id');
-    expect(response.body).toHaveProperty('email', 'test.user@example.com');
+    expect(response.body).toHaveProperty('email', randomEmail);
 
-    // Check if user was saved to the DB
-    const userInDb = await User.findOne({ email: 'test.user@example.com' });
+    // Check DB
+    const userInDb = await User.findOne({ email: randomEmail });
     expect(userInDb).toBeTruthy();
   });
 
   test('POST /api/auth/login - should login user', async () => {
-    // Create a user manually
+    // 1) Register a user
+    const randomEmail = `login.user.${Date.now()}@example.com`;
     await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Login User', email: 'login@example.com', password: '123456' });
+      .send({ name: 'Login User', email: randomEmail, password: '123456' });
 
+    // 2) Login with same credentials
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'login@example.com', password: '123456' });
+      .send({ email: randomEmail, password: '123456' });
 
+    // Expect success
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('token');
   });
